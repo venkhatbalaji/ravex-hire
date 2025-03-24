@@ -1,0 +1,40 @@
+syntax = "proto3";
+
+package user;
+
+service UserService {
+  // Create a general user (employer, candidate, etc.)
+  rpc CreateUser (CreateUserRequest) returns (UserResponse);
+
+  // Get user by their ID
+  rpc GetUserById (GetUserRequest) returns (UserResponse);
+
+  // Create a default admin user when a tenant is created
+  rpc CreateTenantAdmin (CreateTenantAdminRequest) returns (UserResponse);
+}
+
+message CreateUserRequest {
+  string name = 1;
+  string email = 2;
+  string password = 3;
+  string role = 4;
+  int32 tenantId = 5;
+}
+
+message CreateTenantAdminRequest {
+  string name = 1;
+  string email = 2;
+  int32 tenantId = 3;
+}
+
+message GetUserRequest {
+  int32 id = 1;
+}
+
+message UserResponse {
+  int32 id = 1;
+  string name = 2;
+  string email = 3;
+  string role = 4;
+  int32 tenantId = 5;
+}

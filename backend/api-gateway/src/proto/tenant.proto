@@ -1,0 +1,23 @@
+syntax = "proto3";
+
+package tenant;
+
+service TenantService {
+  rpc CreateTenant (CreateTenantRequest) returns (TenantResponse);
+  rpc GetTenant (GetTenantRequest) returns (TenantResponse);
+}
+
+message CreateTenantRequest {
+  string name = 1;
+  string domain = 2;
+}
+
+message GetTenantRequest {
+  string domain = 1;
+}
+
+message TenantResponse {
+  int32 id = 1;
+  string name = 2;
+  string domain = 3;
+}

@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package job;
+
+service JobService {
+  rpc CreateJob (CreateJobRequest) returns (JobResponse);
+  rpc GetJobById (GetJobRequest) returns (JobResponse);
+  rpc GetJobs (Empty) returns (JobsList);
+}
+
+message CreateJobRequest {
+  string title = 1;
+  string description = 2;
+  string location = 3;
+  int32 tenantId = 4;
+}
+
+message GetJobRequest {
+  int32 id = 1;
+}
+
+message JobResponse {
+  int32 id = 1;
+  string title = 2;
+  string description = 3;
+  string location = 4;
+  int32 tenantId = 5;
+}
+
+message JobsList {
+  repeated JobResponse jobs = 1;
+}
+
+message Empty {}
