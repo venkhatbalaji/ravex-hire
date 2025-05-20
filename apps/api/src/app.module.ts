@@ -9,6 +9,7 @@ import { AuthModule } from './auth/auth.module';
 import { OrganizationsModule } from './organizations/organizations.module'; 
 import { CoreModule } from './core/core.module'; 
 import { JobPostingsModule } from './job-postings/job-postings.module'; // Import the new JobPostingsModule
+import { AppCacheModule } from './cache/cache.module'; // Import the AppCacheModule
 // Placeholder for future modules - these will be created in subsequent tasks
 // import { CandidatesModule } from './candidates/candidates.module';
 // import { ApplicationsModule } from './applications/applications.module';
@@ -25,6 +26,7 @@ import { JobPostingsModule } from './job-postings/job-postings.module'; // Impor
     AuthModule, 
     OrganizationsModule, 
     JobPostingsModule, // Add JobPostingsModule here
+    AppCacheModule, // Add the AppCacheModule
     // CandidatesModule,
     // ApplicationsModule,
     // SubscriptionsModule,

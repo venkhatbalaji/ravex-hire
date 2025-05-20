@@ -11,16 +11,24 @@
     "migration:revert": "npm run typeorm -- migration:revert"
   },
   "dependencies": {
+    "@nestjs/cache-manager": "^3.0.1",
     "@nestjs/common": "^10.0.0",
+    "@nestjs/config": "^3.0.0",
     "@nestjs/core": "^10.0.0",
     "@nestjs/platform-express": "^10.0.0",
-    "@nestjs/config": "^3.0.0",
+    "@nestjs/swagger": "^7.4.2",
     "@nestjs/typeorm": "^10.0.0",
+    "cache-manager-redis-store": "^3.0.1",
+    "dotenv": "^16.0.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.1.0",
     "pg": "^8.10.0",
-    "typeorm": "^0.3.17",
+    "rate-limit-redis": "^4.2.0",
+    "redis": "^4.7.1",
     "reflect-metadata": "^0.1.13",
     "rxjs": "^7.8.1",
-    "dotenv": "^16.0.0"
+    "swagger-ui-express": "^5.0.1",
+    "typeorm": "^0.3.17"
   },
   "devDependencies": {
     "@types/node": "^20.3.1",

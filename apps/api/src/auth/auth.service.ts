@@ -4,9 +4,10 @@ import { UsersService } from '../users/users.service';
 import { JwtService } from '@nestjs/jwt';
 import { ConfigService } from '@nestjs/config';
 import * as bcrypt from 'bcrypt';
-import { User, UserRole } from '../users/entities/user.entity'; 
+import { User, UserRole } from '../users/entities/user.entity';
 import { OrganizationsService } from '../organizations/organizations.service'; // New import
 import { CreateOrganizationRequestDto } from './dto/create-organization.dto'; // New DTO
+import { SessionService, SessionData } from './session.service'; // Import SessionService
 import { Organization } from '../organizations/entities/organization.entity'; // For type hint
 
 export interface AuthUserResponse { 
@@ -25,6 +26,7 @@ export class AuthService {
     private jwtService: JwtService,
     private configService: ConfigService,
     private organizationsService: OrganizationsService, // Inject OrganizationsService
+    private sessionService: SessionService, // Inject SessionService
   ) {}
 
   async validateUser(email: string, pass: string): Promise<Omit<User, 'password' | 'candidateProfile' | 'organization' | 'ownedOrganizations'>> {
@@ -47,6 +49,21 @@ export class AuthService {
     this.logger.log(`Generating token for user: ${user.email}, role: ${user.role}, orgId: ${user.organizationId}`);
     const accessToken = this.jwtService.sign(payload);
 
+    // Store session in Redis
+    const decodedToken = this.jwtService.decode(accessToken) as { exp?: number; iat?: number; sub: string | number };
+    const sessionData: SessionData = {
+      userId: decodedToken.sub, // 'sub' from JWT payload is user.id
+      iat: decodedToken.iat,
+      exp: decodedToken.exp,
+      // You could add other details like user.role, user.organizationId to SessionData if needed
+    };
+
+    const ttl = decodedToken.exp ? decodedToken.exp - Math.floor(Date.now() / 1000) : undefined;
+    if (ttl === undefined || ttl > 0) { // if no expiry or token is not yet expired
+      await this.sessionService.createSession(accessToken, sessionData, ttl);
+    }
+    // if ttl <=0, token is already expired, session will not be created by sessionService or will be for 0s.
+
     const userResponse: AuthUserResponse = {
       id: user.id,
       email: user.email,
@@ -57,6 +74,10 @@ export class AuthService {
       accessToken,
       user: userResponse,
     };
+  }
+
+  async logout(token: string): Promise<void> {
+    await this.sessionService.deleteSession(token);
   }
 
   async hashPassword(password: string): Promise<string> {

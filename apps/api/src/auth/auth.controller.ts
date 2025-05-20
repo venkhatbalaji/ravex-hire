@@ -1,9 +1,10 @@
 // apps/api/src/auth/auth.controller.ts
-import { Controller, Post, UseGuards, Request, Body, HttpCode, HttpStatus } from '@nestjs/common';
+import { Controller, Post, UseGuards, Request, Body, HttpCode, HttpStatus, UnauthorizedException } from '@nestjs/common';
 import { AuthService } from './auth.service'; // AuthUserResponse removed as it's an interface in service
-import { LocalAuthGuard } from './guards/local-auth.guard'; 
-import { User } from '../users/entities/user.entity'; 
-import { LoginRequestDto } from './dto/login.dto'; 
+import { LocalAuthGuard } from './guards/local-auth.guard';
+import { SessionAuthGuard } from './guards/session-auth.guard'; // Import SessionAuthGuard
+import { User } from '../users/entities/user.entity';
+import { LoginRequestDto } from './dto/login.dto';
 import { AuthTokenResponseDto } from './dto/auth-response.dto'; 
 import { CreateOrganizationRequestDto } from './dto/create-organization.dto'; // New DTO
 import { Organization } from '../organizations/entities/organization.entity'; // For type hint
@@ -42,5 +43,25 @@ export class AuthController {
       user: userWithoutSensitiveData,     // Or a User DTO
       accessToken: result.accessToken,
     };
+  }
+
+  @UseGuards(SessionAuthGuard)
+  @Post('logout')
+  @HttpCode(HttpStatus.OK) // Or HttpStatus.NO_CONTENT
+  async logout(@Request() req): Promise<{ message: string }> {
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      // This case should ideally not be reached if SessionAuthGuard is effective
+      throw new UnauthorizedException('Authorization header not found');
+    }
+    const parts = authHeader.split(' ');
+    if (parts.length !== 2 || parts[0].toLowerCase() !== 'bearer') {
+      // Also should not be reached if SessionAuthGuard is effective
+      throw new UnauthorizedException('Malformed token');
+    }
+    const token = parts[1];
+
+    await this.authService.logout(token);
+    return { message: 'Successfully logged out' };
   }
 }

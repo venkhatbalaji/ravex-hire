@@ -8,8 +8,10 @@ import { JwtModule } from '@nestjs/jwt';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { LocalStrategy } from './strategies/local.strategy';
 import { JwtStrategy } from './strategies/jwt.strategy';
-import { OrganizationsModule } from '../organizations/organizations.module'; 
+import { OrganizationsModule } from '../organizations/organizations.module';
 import { CoreModule } from '../../core/core.module'; // Import CoreModule
+import { SessionService } from './session.service'; // Import SessionService
+import { SessionAuthGuard } from './guards/session-auth.guard'; // Import SessionAuthGuard
 
 @Module({
   imports: [
@@ -32,7 +34,7 @@ import { CoreModule } from '../../core/core.module'; // Import CoreModule
     // ConfigModule itself is already global from AppModule
   ],
   controllers: [AuthController],
-  providers: [AuthService, LocalStrategy, JwtStrategy],
-  exports: [AuthService, JwtModule], 
+  providers: [AuthService, LocalStrategy, JwtStrategy, SessionService, SessionAuthGuard], // Add SessionAuthGuard to providers
+  exports: [AuthService, JwtModule, SessionService], // SessionAuthGuard is not exported by default
 })
 export class AuthModule {}

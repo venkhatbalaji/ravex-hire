@@ -20,3 +20,12 @@ export const databaseConfig = () => ({
     migrationsDir: 'src/database/migrations', // Used by TypeORM CLI to know where to create new migrations
   },
 });
+
+export const redisConfig = () => ({
+  redis: { // Namespacing Redis configuration
+    host: process.env.REDIS_HOST || 'localhost',
+    port: parseInt(process.env.REDIS_PORT, 10) || 6379,
+    // password: process.env.REDIS_PASSWORD, // Uncomment if you have a password
+    // ttl: parseInt(process.env.REDIS_TTL_SECONDS, 10) || 3600, // Default TTL for cache entries
+  }
+});

@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: ./apps/api # Context should point to where Dockerfile is
+      dockerfile: Dockerfile
+    container_name: ravex-api
+    ports:
+      - "${API_PORT_EXTERNAL:-3000}:${API_PORT_INTERNAL:-3000}" # Use environment variables with defaults
+    environment:
+      # Common environment variables - these should ideally be in a .env file
+      # and docker-compose should use 'env_file' or they should be set in the execution environment
+      NODE_ENV: production
+      API_PORT: ${API_PORT_INTERNAL:-3000} # Port inside the container
+      # Database (example, adjust to your actual needs)
+      # DB_HOST: postgres_db # If you had a postgres service in docker-compose
+      # DB_PORT: 5432
+      # DB_USERNAME: user
+      # DB_PASSWORD: password
+      # DB_NAME: ravexdb
+      # Redis
+      REDIS_HOST: redis # Service name of the Redis container
+      REDIS_PORT: 6379
+      # Add other necessary environment variables for your application
+      # JWT_SECRET: your_jwt_secret # Example
+      # CORS_ORIGIN: http://localhost:3001 # Example for a client app
+    depends_on:
+      - redis
+    volumes:
+      # For production, typically you don't mount source code.
+      # For development, you might add:
+      # - ./apps/api:/usr/src/app/apps/api 
+      # - /usr/src/app/node_modules # Anonymous volume to prevent host node_modules overwriting container's
+    networks:
+      - ravex-network
+
+  redis:
+    image: redis:7-alpine # Using a specific version is good practice
+    container_name: ravex-redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data # Persist Redis data
+    networks:
+      - ravex-network
+
+volumes:
+  redis_data: # Defines the named volume for Redis persistence
+
+networks:
+  ravex-network:
+    driver: bridge
