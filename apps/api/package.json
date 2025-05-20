@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Ravex API",
   "scripts": {
-    "build": "echo 'Build script placeholder - in Nx, this would be handled by Nx build commands'",
-    "start:dev": "echo 'Start dev script placeholder - in Nx, this would be handled by nx serve api'",
+    "build": "nx build api --prod",
+    "start:dev": "nx serve api",
     "typeorm": "ts-node -r tsconfig-paths/register ../../node_modules/typeorm/cli.js --dataSource ormconfig.ts",
     "migration:generate": "npm run typeorm -- migration:generate src/database/migrations/%npm_config_name%",
     "migration:run": "npm run typeorm -- migration:run",
