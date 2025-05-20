@@ -8,7 +8,7 @@ import { ApiTags, ApiBearerAuth, ApiOkResponse } from '@nestjs/swagger';
 export class UsersController {
   @UseGuards(SessionAuthGuard)
   @Get('profile')
-  @ApiBearerAuth('JWT-auth') // Matches the name in main.ts Swagger setup
+  @ApiBearerAuth('access-token') // Updated to match main.ts Swagger setup
   @ApiOkResponse({ description: 'Returns the authenticated user profile based on session data.'})
   getProfile(@Request() req) {
     // req.user is populated by SessionAuthGuard
