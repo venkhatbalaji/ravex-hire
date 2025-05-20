@@ -1,53 +1,102 @@
 version: '3.8'
 
 services:
-  api:
-    build:
-      context: ./apps/api # Context should point to where Dockerfile is
-      dockerfile: Dockerfile
-    container_name: ravex-api
-    ports:
-      - "${API_PORT_EXTERNAL:-3000}:${API_PORT_INTERNAL:-3000}" # Use environment variables with defaults
-    environment:
-      # Common environment variables - these should ideally be in a .env file
-      # and docker-compose should use 'env_file' or they should be set in the execution environment
-      NODE_ENV: production
-      API_PORT: ${API_PORT_INTERNAL:-3000} # Port inside the container
-      # Database (example, adjust to your actual needs)
-      # DB_HOST: postgres_db # If you had a postgres service in docker-compose
-      # DB_PORT: 5432
-      # DB_USERNAME: user
-      # DB_PASSWORD: password
-      # DB_NAME: ravexdb
-      # Redis
-      REDIS_HOST: redis # Service name of the Redis container
-      REDIS_PORT: 6379
-      # Add other necessary environment variables for your application
-      # JWT_SECRET: your_jwt_secret # Example
-      # CORS_ORIGIN: http://localhost:3001 # Example for a client app
-    depends_on:
-      - redis
-    volumes:
-      # For production, typically you don't mount source code.
-      # For development, you might add:
-      # - ./apps/api:/usr/src/app/apps/api 
-      # - /usr/src/app/node_modules # Anonymous volume to prevent host node_modules overwriting container's
-    networks:
-      - ravex-network
-
   redis:
-    image: redis:7-alpine # Using a specific version is good practice
+    image: redis:7-alpine
     container_name: ravex-redis
     ports:
       - "6379:6379"
     volumes:
-      - redis_data:/data # Persist Redis data
+      - redis_data:/data
     networks:
       - ravex-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: ravex-api
+    ports:
+      # API_PORT_EXTERNAL is the port accessible from the host machine
+      # API_PORT_INTERNAL is the port the NestJS app listens on inside the container
+      - "${API_PORT_EXTERNAL:-3001}:${API_PORT_INTERNAL:-3000}"
+    environment:
+      NODE_ENV: production
+      API_PORT: ${API_PORT_INTERNAL:-3000} # Renamed from API_PORT_INTERNAL to match backend's expected env var from main.ts
+      
+      # Redis connection details for backend (service name for host)
+      REDIS_HOST: ravex-redis 
+      REDIS_PORT: 6379
+      # REDIS_PASSWORD: your_redis_password # Uncomment and set if Redis password is configured
+
+      # Session management
+      SESSION_SECRET: "a-very-strong-session-secret-minimum-32-characters-long" # IMPORTANT: Override in .env file for production
+      SESSION_MAX_AGE_MS: "86400000" # 1 day (24 * 60 * 60 * 1000)
+
+      # Rate limiting
+      RATE_LIMIT_WINDOW_MS: "900000" # 15 minutes (15 * 60 * 1000)
+      RATE_LIMIT_MAX_REQUESTS: "100"
+
+      # CORS configuration (origin of the frontend application)
+      # Assumes frontend is accessible on localhost at the FRONTEND_PORT_EXTERNAL
+      CORS_ORIGIN: "http://localhost:${FRONTEND_PORT_EXTERNAL:-3000}"
+
+      # Database connection (placeholders - provide actual values via .env or direct)
+      # DB_TYPE: postgres
+      # DB_HOST: your_db_host_or_service_name 
+      # DB_PORT: 5432
+      # DB_USERNAME: your_db_user
+      # DB_PASSWORD: your_db_password
+      # DB_DATABASE: your_db_name
+
+      # Other environment variables for backend can be added here
+      # Example: LOG_LEVEL: 'info'
+
+    depends_on:
+      - redis
+    networks:
+      - ravex-network
+    restart: unless-stopped
+    # To use an .env file for the backend:
+    # env_file:
+    #   - ./backend/.env.production # or ./backend/.env
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: ravex-client
+    ports:
+      # FRONTEND_PORT_EXTERNAL is the port accessible from the host machine
+      # FRONTEND_PORT_INTERNAL is the port Next.js app listens on inside the container (usually 3000 for dev, can be same for prod)
+      - "${FRONTEND_PORT_EXTERNAL:-3000}:${FRONTEND_PORT_INTERNAL:-3000}"
+    environment:
+      NODE_ENV: production
+      # PORT: ${FRONTEND_PORT_INTERNAL:-3000} # Next.js typically uses PORT for its internal listening port if not default 3000
+      
+      # URL for the frontend to make API requests.
+      # This should be the backend service name and its *internal* port for container-to-container communication.
+      NEXT_PUBLIC_API_URL: "http://ravex-api:${API_PORT_INTERNAL:-3000}" 
+      
+      # If your Next.js app needs to know its own public URL (less common for this setup)
+      # NEXT_PUBLIC_APP_URL: "http://localhost:${FRONTEND_PORT_EXTERNAL:-3000}"
+
+      # Other public environment variables for Next.js (must be prefixed with NEXT_PUBLIC_)
+      # NEXT_PUBLIC_SOME_CONFIG: "value"
+    depends_on:
+      - backend # Ensures backend is started, helpful for frontend if it makes initial API calls
+    networks:
+      - ravex-network
+    restart: unless-stopped
+    # To use an .env file for the frontend:
+    # env_file:
+    #   - ./frontend/.env.production # or ./frontend/.env
 
 volumes:
-  redis_data: # Defines the named volume for Redis persistence
+  redis_data: {} # Defines the named volume for Redis persistence
 
 networks:
   ravex-network:
-    driver: bridge
+    driver: bridge # Defines the custom bridge network
+```
