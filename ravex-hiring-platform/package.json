@@ -1,0 +1,14 @@
+{
+  "name": "@ravex-hiring-platform/source",
+  "version": "0.0.0",
+  "license": "MIT",
+  "scripts": {},
+  "private": true,
+  "devDependencies": {
+    "@nx/js": "21.0.3",
+    "@nx/nest": "^21.0.3",
+    "@nx/next": "^21.0.3",
+    "@nx/workspace": "21.0.3",
+    "nx": "21.0.3"
+  }
+}
