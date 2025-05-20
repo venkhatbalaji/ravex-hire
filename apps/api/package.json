@@ -3,8 +3,8 @@
   "version": "0.0.1",
   "description": "Ravex API",
   "scripts": {
-    "build": "npx nx build api --prod",
-    "start:dev": "npx nx serve api",
+    "build": "cd ../../ravex-hiring-platform && npx nx build api --prod",
+    "start:dev": "cd ../../ravex-hiring-platform && npx nx serve api",
     "typeorm": "ts-node -r tsconfig-paths/register ../../node_modules/typeorm/cli.js --dataSource ormconfig.ts",
     "migration:generate": "npm run typeorm -- migration:generate src/database/migrations/%npm_config_name%",
     "migration:run": "npm run typeorm -- migration:run",
