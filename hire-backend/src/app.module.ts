@@ -4,12 +4,12 @@ import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TenantMiddleware } from '../common/middleware/tenant.middleware';
-import { ItemsModule } from '../items/items.module';
+import { TenantMiddleware } from './common/middleware/tenant.middleware';
+import { ItemsModule } from './items/items.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/hirerachy'),
+    MongooseModule.forRoot('mongodb://localhost/hierarchy'),
     ItemsModule,
     WinstonModule.forRoot({
       level: 'info',
