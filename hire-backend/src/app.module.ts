@@ -9,7 +9,7 @@ import { ItemsModule } from '../items/items.module';
 
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost/hirerachy'),
+    MongooseModule.forRoot('mongodb://localhost/hierarchy'),
     ItemsModule,
     WinstonModule.forRoot({
       level: 'info',
