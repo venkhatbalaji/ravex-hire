@@ -14,14 +14,19 @@ export class RolesGuard implements CanActivate {
     if (!requiredRoles) {
       return true;
     }
-    const { user } = context.switchToHttp().getRequest();
-    // For now, assume user.roles is an array of strings.
-    // A real implementation would involve more robust role checking.
-    // Also, ensure 'user' object and 'user.roles' exist.
-    if (user && user.roles && Array.isArray(user.roles)) { // Check if user.roles is an array
-       return requiredRoles.some((role) => (user.roles as string[]).includes(role));
+
+    const request = context.switchToHttp().getRequest();
+    const user = request.user;
+
+    if (!user || !Array.isArray(user.roles) || user.roles.length === 0) {
+      throw new ForbiddenException();
     }
-    // It's generally better to throw an exception for unauthorized access.
-    throw new ForbiddenException('You do not have the necessary roles to access this resource.');
+
+    const hasRole = requiredRoles.some((role) => user.roles.includes(role));
+    if (!hasRole) {
+      throw new ForbiddenException();
+    }
+
+    return true;
   }
 }

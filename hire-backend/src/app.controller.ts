@@ -1,7 +1,7 @@
 import { Controller, Get, UseGuards, Req } from '@nestjs/common';
 import { AppService } from './app.service';
-import { Roles } from '../common/decorators/roles.decorator';
-import { RolesGuard } from '../common/guards/roles.guard';
+import { Roles } from './common/decorators/roles.decorator';
+import { RolesGuard } from './common/guards/roles.guard';
 
 @Controller()
 export class AppController {
