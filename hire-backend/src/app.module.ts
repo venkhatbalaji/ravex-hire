@@ -1,16 +1,38 @@
-import { Module, NestModule, MiddlewareConsumer } from '@nestjs/common';
+import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
-import { TenantMiddleware } from './common/middleware/tenant.middleware';
 import { ItemsModule } from './items/items.module';
+import { SubdomainTenantMiddleware } from './common/middleware/subdomain-tenant.middleware';
+import { AuthModule } from './auth/auth.module';
+import { TenantsModule } from './tenants/tenants.module';
+import { OpportunitiesModule } from './opportunities/opportunities.module';
+import { CandidatesModule } from './candidates/candidates.module';
+import { ApplicationsModule } from './applications/applications.module';
 
 @Module({
   imports: [
+    ConfigModule.forRoot({ isGlobal: true }),
     MongooseModule.forRoot('mongodb://localhost/hierarchy'),
+    TypeOrmModule.forRootAsync({
+      useFactory: (config: ConfigService) => ({
+        type: 'postgres',
+        url: config.get('DATABASE_URL'),
+        autoLoadEntities: true,
+        synchronize: true,
+      }),
+      inject: [ConfigService],
+    }),
     ItemsModule,
+    AuthModule,
+    TenantsModule,
+    OpportunitiesModule,
+    CandidatesModule,
+    ApplicationsModule,
     WinstonModule.forRoot({
       level: 'info',
       format: winston.format.combine(
@@ -34,6 +56,6 @@ import { ItemsModule } from './items/items.module';
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {
-    consumer.apply(TenantMiddleware).forRoutes('*');
+    consumer.apply(SubdomainTenantMiddleware).forRoutes('*');
   }
 }

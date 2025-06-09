@@ -15,7 +15,7 @@ export class ItemsService {
   ) {}
 
   async create(createItemDto: CreateItemDto, tenantId: string): Promise<Item> {
-    const newItem = new this.itemModel({
+    const newItem = (this.itemModel as any).new({
       ...createItemDto,
       tenantId,
     });
