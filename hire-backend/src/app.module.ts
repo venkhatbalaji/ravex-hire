@@ -1,10 +1,12 @@
 import { Module, MiddlewareConsumer, NestModule } from '@nestjs/common';
-import { TypeOrmModule } from '@nestjs/typeorm';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { MongooseModule } from '@nestjs/mongoose';
+import { TypeOrmModule } from '@nestjs/typeorm';
 import { WinstonModule } from 'nest-winston';
 import * as winston from 'winston';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { ItemsModule } from './items/items.module';
 import { SubdomainTenantMiddleware } from './common/middleware/subdomain-tenant.middleware';
 import { AuthModule } from './auth/auth.module';
 import { TenantsModule } from './tenants/tenants.module';
@@ -15,6 +17,7 @@ import { ApplicationsModule } from './applications/applications.module';
 @Module({
   imports: [
     ConfigModule.forRoot({ isGlobal: true }),
+    MongooseModule.forRoot('mongodb://localhost/hierarchy'),
     TypeOrmModule.forRootAsync({
       useFactory: (config: ConfigService) => ({
         type: 'postgres',
@@ -24,6 +27,7 @@ import { ApplicationsModule } from './applications/applications.module';
       }),
       inject: [ConfigService],
     }),
+    ItemsModule,
     AuthModule,
     TenantsModule,
     OpportunitiesModule,
